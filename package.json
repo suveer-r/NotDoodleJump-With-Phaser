@@ -1,0 +1,25 @@
+{
+  "name": "test-game-with-phaser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "normalize.css": "^8.0.1",
+    "phaser": "^3.21.0",
+    "phaser3-rex-plugins": "^1.1.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suveer-r/Test-Game-With-Phaser.git"
+  },
+  "author": "Suveer R",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/suveer-r/Test-Game-With-Phaser/issues"
+  },
+  "homepage": "https://github.com/suveer-r/Test-Game-With-Phaser#readme"
+}
