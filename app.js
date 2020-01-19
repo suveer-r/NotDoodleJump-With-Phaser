@@ -1,22 +1,11 @@
-var scaleRatio = window.devicePixelRatio / 3;
-var player;
-var tn;
-var td;
-var tb;
-var rocket;
-var spring;
-var coin;
-var enemy_m;
-var enemy_s;
-
 var config = {
     type: Phaser.AUTO,
-    width: window.innerWidth * window.devicePixelRatio,
-    height: window.innerHeight * window.devicePixelRatio,
-    scale :{
+    scale : {
         parent: 'gamespace',
-        scaleMode: Phaser.scaleManager.FIT,
-        autoCenter: Phaser.scale.CENTER_BOTH
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 600,
+        height: 800
     },
     physics: {
         default: 'arcade',
@@ -25,18 +14,9 @@ var config = {
             // gravity: {y : 200}
         }
     },
-    scene: [Game],
-    // plugins: {
-    //     scene: [
-    //         {
-    //             key: key,
-    //             plugin: pluginName,
-    //             start: true
-    //         }
-    //     ]
-    // },
+    scene: [Game, ],
     backgroundColor: 0xeeeeee
 };
-
+// console.log(game.config.scale);
 var game = new Phaser.Game(config);
 
