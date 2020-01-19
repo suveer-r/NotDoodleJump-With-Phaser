@@ -11,13 +11,13 @@ var enemy_s;
 
 var config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    // scale :{
-    //     parent: 'gamespace',
-    //     mode: Phaser.scale.FIT,
-    //     autoCenter: Phaser.scale.CENTER_BOTH
-    // },
+    width: window.innerWidth * window.devicePixelRatio,
+    height: window.innerHeight * window.devicePixelRatio,
+    scale :{
+        parent: 'gamespace',
+        scaleMode: Phaser.scaleManager.FIT,
+        autoCenter: Phaser.scale.CENTER_BOTH
+    },
     physics: {
         default: 'arcade',
         arcade: {
