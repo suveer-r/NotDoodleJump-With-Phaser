@@ -88,13 +88,13 @@ class Game extends Phaser.Scene {
 
 		// spawnTile();
 		for( var i = 0; i<5; i++){
-            this.spawnTile( Phaser.Math.Between( 25, this.physics.world.bounds.width - 25 ), this.physics.world.bounds.height - 200 * i );
+            this.spawnTile( Phaser.Math.Between( 25, this.physics.world.bounds.width - 25 ), this.physics.world.bounds.height - 200 * i, 'tile-n');
         }
 
 	} 
 	/* Sub function for Regular tiles. Might be handy other tiles in future */  
-    spawnTile(x, y){
-	  var tile = tilesGroup.create(x, y, 'tile-n');
+    spawnTile(x, y, type){
+	  var tile = tilesGroup.create(x, y, type);
 	//   tile.scale = .5;
         tile.setImmovable();
 		return tile;
