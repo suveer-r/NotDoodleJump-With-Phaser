@@ -19,9 +19,9 @@ class Game extends Phaser.Scene {
 		/* Preload all assets. */
 		this.load.svg("player", "assets/player-01.svg");
 		this.load.svg("tile", "assets/");
-		this.load.svg("tile-n", "assets/tile-n-01.svg");
-		this.load.svg("tile-d", "assets/tile-d-01.svg");
-		this.load.svg("tile-b", "assets/tile-b-01.svg");
+		this.load.svg("tile-n", "assets/tile-n-01.svg", { scale: 1.3 });
+		this.load.svg("tile-d", "assets/tile-d-01.svg", { scale: 1.3 });
+		this.load.svg("tile-b", "assets/tile-b-01.svg", { scale: 1.3 });
 		this.load.svg("rocket", "assets/");
 		this.load.svg("spring", "assets/");
 		this.load.svg("coin", "assets/");
@@ -75,6 +75,7 @@ class Game extends Phaser.Scene {
 		player.body.checkCollision.left = false;
 		player.body.checkCollision.right = false;
 		player.scale = 0.5;
+		player.depth = 1;
 
 		player.yOrig = player.y;
         player.yChange = 0;
@@ -84,20 +85,19 @@ class Game extends Phaser.Scene {
     createTiles(){
         tilesGroup = this.physics.add.staticGroup({runChildUpdate: false});
 		tilesGroup.enableBody = true;
-		tilesGroup.setScaleX = .5;
-
+		var tileChild = tilesGroup.getChildren();
+		
 		// spawnTile();
 		for( var i = 0; i<5; i++){
-            this.spawnTile( Phaser.Math.Between( 25, this.physics.world.bounds.width - 25 ), this.physics.world.bounds.height - 200 - 200 * i, 'tile-n');
+			this.spawnTile( Phaser.Math.Between( 25, this.physics.world.bounds.width - 25 ), this.physics.world.bounds.height - 200 - 200 * i, 'tile-n');
 		}
 		
-		var tileChild = tilesGroup.getChildren();
-
+		
 	} 
 	/* Sub function for Regular tiles. Might be handy other tiles in future */  
     spawnTile(x, y, type){
-	  var tile = tilesGroup.create(x, y, type);
-        tile.setImmovable();
+		var tile = tilesGroup.create(x, y, type);
+		tile.setImmovable();
 		return tile;
 	}
 
