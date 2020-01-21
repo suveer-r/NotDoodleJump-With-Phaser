@@ -117,7 +117,7 @@ class Game extends Phaser.Scene {
 		else player.body.velocity.x = 0;
 
 		/* Up arrow to give Y velocity for debug beyond camera screen */
-		// if (this.key_Up.isDown) player.body.velocity.y = -400;
+		if (this.key_Up.isDown) player.body.velocity.y = -400;
 
 		this.physics.world.wrap(player, player.width / 6, false);
 
