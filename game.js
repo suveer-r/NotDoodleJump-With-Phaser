@@ -30,9 +30,6 @@ class Game extends Phaser.Scene {
 	}
 
 	create() {
-		/* AlignGrid util to debug from https://phasergames.com/ */
-		this.aGrid = new AlignGrid({ scene: this, rows: 11, cols: 11 });
-		this.aGrid.showNumbers(); //debugging the Grid
 		
 		/* Create Floor */
 		var floor = this.physics.add.image(game.config.width/2, 830,'tile-b');
@@ -47,6 +44,10 @@ class Game extends Phaser.Scene {
 		/* Collision checks and events */
 		this.physics.add.collider(player, floor);
 		this.physics.add.collider(player, tilesGroup, this.bounceBack, null, this);
+
+		/* camera and tile tracking vars */
+		this.cameraYMin = 99999;
+		this.tileYMin = 99999;
 		
 		/* Control setup, Kbd only for now! Mouse and touch or Gyro later */
 		this.key_left = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
@@ -67,7 +68,7 @@ class Game extends Phaser.Scene {
         player = this.physics.add.image(game.config.width/2, 3*game.config.height/4, "player");
 		// player.body.setCollideWorldBounds();
 		player.setVelocity(0, -400);
-		player.setGravityY(200);
+		player.setGravityY(360);
 		player.setBounce(0.4);
 		player.body.checkCollision.up = false;
 		player.body.checkCollision.down = true;
@@ -81,21 +82,21 @@ class Game extends Phaser.Scene {
 	
 	/* Create Regular Tiles/Platform */
     createTiles(){
-        tilesGroup = this.physics.add.staticGroup();
-        tilesGroup.enableBody = true;
-		
-        tilesGroup.createMultiple(20, 'tile-n');
+        tilesGroup = this.physics.add.staticGroup({runChildUpdate: false});
+		tilesGroup.enableBody = true;
+		tilesGroup.setScaleX = .5;
 
 		// spawnTile();
 		for( var i = 0; i<5; i++){
-            this.spawnTile( Phaser.Math.Between( 25, this.physics.world.bounds.width - 25 ), this.physics.world.bounds.height - 200 * i, 'tile-n');
-        }
+            this.spawnTile( Phaser.Math.Between( 25, this.physics.world.bounds.width - 25 ), this.physics.world.bounds.height - 200 - 200 * i, 'tile-n');
+		}
+		
+		var tileChild = tilesGroup.getChildren();
 
 	} 
 	/* Sub function for Regular tiles. Might be handy other tiles in future */  
     spawnTile(x, y, type){
 	  var tile = tilesGroup.create(x, y, type);
-	//   tile.scale = .5;
         tile.setImmovable();
 		return tile;
 	}
@@ -109,19 +110,32 @@ class Game extends Phaser.Scene {
         /* Camera tracking */
         // this.cameras.main.startFollow(player, true);
         this.cameras.main.setLerp(.5);
-        this.cameras.main.centerOnY(player.y);
+		this.cameras.main.centerOnY(player.y);
 		
 		if (this.key_left.isDown) player.body.velocity.x = -400;
 		else if (this.key_right.isDown) player.body.velocity.x = 400;
 		else player.body.velocity.x = 0;
 
-		if (this.key_Up.isDown) player.body.velocity.y = -400;
+		/* Up arrow to give Y velocity for debug beyond camera screen */
+		// if (this.key_Up.isDown) player.body.velocity.y = -400;
 
 		this.physics.world.wrap(player, player.width / 6, false);
 
         /* track the maximum amount that the hero has travelled */
 		player.yChange = Math.max( player.yChange, Math.abs( player.y - player.yOrig ) );
-		
-	}
+
+		/* For each tilesGroup child, find out which is the highest
+		if one goes below the camera view, then create a new one at a distance from the highest one
+		these are pooled so they are very performant */
+		tilesGroup.children.iterate(function( item ) {
+			this.tileYMin = Math.min( this.tileYMin, item.y )
+			this.cameraYMin = Math.min( this.cameraYMin, player.y - this.game.config.height + 430 );
+			if( item.y > this.cameraYMin + this.game.config.height ) {
+				item.destroy();
+				this.spawnTile( Phaser.Math.Between( 25, this.physics.world.bounds.width - 25 ), this.tileYMin - 200, 'tile-n');
+			}
+		}, this );
+	
+}
 	
 }
