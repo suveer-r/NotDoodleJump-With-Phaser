@@ -14,12 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/suveer-r/Test-Game-With-Phaser.git"
+    "url": "git+https://github.com/suveer-r/NotDoodleJump-With-Phaser.git"
   },
   "author": "Suveer R",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/suveer-r/Test-Game-With-Phaser/issues"
+    "url": "https://github.com/suveer-r/NotDoodleJump-With-Phaser/issues"
   },
-  "homepage": "https://github.com/suveer-r/Test-Game-With-Phaser#readme"
+  "homepage": "https://github.com/suveer-r/NotDoodleJump-With-Phaser#readme"
 }
