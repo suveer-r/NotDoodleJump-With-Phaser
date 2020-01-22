@@ -2,6 +2,11 @@
 var scaleRatio = window.devicePixelRatio / 3;
 var player;
 var tilesGroup;
+var floor;
+var tile;
+var tileChild;
+var score = 0;
+var scoreText;
 var tn;
 var td;
 var tb;
@@ -17,11 +22,11 @@ class Game extends Phaser.Scene {
 
 	preload() {
 		/* Preload all assets. */
-		this.load.svg("player", "assets/player-01.svg");
+		this.load.svg("player", "assets/player-01.svg", { scale: .8 });
 		this.load.svg("tile", "assets/");
-		this.load.svg("tile-n", "assets/tile-n-01.svg", { scale: 1.3 });
-		this.load.svg("tile-d", "assets/tile-d-01.svg", { scale: 1.3 });
-		this.load.svg("tile-b", "assets/tile-b-01.svg", { scale: 1.3 });
+		this.load.svg("tile-n", "assets/tile-n-01.svg", { scale: 1 });
+		this.load.svg("tile-d", "assets/tile-d-01.svg", { scale: 1 });
+		this.load.svg("tile-b", "assets/tile-b-01.svg", { scale: 1 });
 		this.load.svg("rocket", "assets/");
 		this.load.svg("spring", "assets/");
 		this.load.svg("coin", "assets/");
@@ -32,14 +37,16 @@ class Game extends Phaser.Scene {
 	create() {
 		
 		/* Create Floor */
-		var floor = this.physics.add.image(game.config.width/2, 830,'tile-b');
+		floor = this.physics.add.image(game.config.width/2, 830,'tile-b');
 		floor.setImmovable();
 		floor.scale = 6;
 
 		/* Create Tiles/Platforms */
 		this.createTiles();
 		/* Create Player Model */
-        this.createPlayer();
+		this.createPlayer();
+		/* Score Text */
+		scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#a0f' }).setScrollFactor(0);
 
 		/* Collision checks and events */
 		this.physics.add.collider(player, floor);
@@ -59,7 +66,9 @@ class Game extends Phaser.Scene {
 	bounceBack(_player, _tilesGroup){
 		if (_player.body.touching.down && _tilesGroup.body.touching.up)
             {
-				player.body.velocity.y = -400;                
+				score += 10;
+				scoreText.setText('Score: ' + score);              
+				player.body.velocity.y = -400;
             }
 	}
 
@@ -74,7 +83,7 @@ class Game extends Phaser.Scene {
 		player.body.checkCollision.down = true;
 		player.body.checkCollision.left = false;
 		player.body.checkCollision.right = false;
-		player.scale = 0.5;
+		// player.scale = 0.5;
 		player.depth = 1;
 
 		player.yOrig = player.y;
@@ -85,7 +94,7 @@ class Game extends Phaser.Scene {
     createTiles(){
         tilesGroup = this.physics.add.staticGroup({runChildUpdate: false});
 		tilesGroup.enableBody = true;
-		var tileChild = tilesGroup.getChildren();
+		tileChild = tilesGroup.getChildren();
 		
 		// spawnTile();
 		for( var i = 0; i<5; i++){
@@ -96,7 +105,7 @@ class Game extends Phaser.Scene {
 	} 
 	/* Sub function for Regular tiles. Might be handy other tiles in future */  
     spawnTile(x, y, type){
-		var tile = tilesGroup.create(x, y, type);
+		tile = tilesGroup.create(x, y, type);
 		tile.setImmovable();
 		return tile;
 	}
@@ -119,6 +128,7 @@ class Game extends Phaser.Scene {
 		/* Up arrow to give Y velocity for debug beyond camera screen */
 		if (this.key_Up.isDown) player.body.velocity.y = -400;
 
+		/* Wrap the player from left <==> right of the screen. */
 		this.physics.world.wrap(player, player.width / 6, false);
 
         /* track the maximum amount that the hero has travelled */
