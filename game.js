@@ -89,8 +89,6 @@ class Game extends Phaser.Scene {
 		/* Mouse Clicks */
 		this.input.mouse.disableContextMenu();
 		
-		/* Device Orientation */
-		window.addEventListener("deviceorientation", this.handleOrientation, true);
 	}
 	
 	update(delta) {
@@ -121,6 +119,8 @@ class Game extends Phaser.Scene {
 			else player.body.velocity.x = 0;
 		};
 		
+		/* Device Orientation */
+		window.addEventListener("deviceorientation", this.handleOrientation, true);
 		
 		/* Up arrow to give Y velocity for debug beyond camera screen */
 		if (this.key_Up.isDown) player.body.velocity.y = -400;
