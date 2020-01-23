@@ -18,6 +18,8 @@ var scoreText;
 var tn;
 var td;
 var tb;
+var zoneL;
+var zoneR;
 var rocket;
 var spring;
 var star;
@@ -63,6 +65,9 @@ class Game extends Phaser.Scene {
 		this.createStars();
 		/* Score Text */
 		scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#a0f' }).setScrollFactor(0);
+		/* Touch Zones */
+		zoneL = this.add.zone(0, 0, game.config.width/2, game.config.height).setInteractive().setScrollFactor(0);
+		zoneR = this.add.zone(game.config.width/2, 0, game.config.width/2, game.config.height).setInteractive().setScrollFactor(0);
 
 		/* Collision checks and events */
 		this.physics.add.collider(player, floor);
@@ -76,10 +81,99 @@ class Game extends Phaser.Scene {
 		this.cameraYMin = 99999;
 		this.tileYMin = 99999;
 		
-		/* Control setup, Kbd only for now! Mouse and touch or Gyro later */
+		/* Control setup, Kbd  */
 		this.key_left = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
 		this.key_right = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 		this.key_Up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+		/* Mouse Clicks */
+		this.input.mouse.disableContextMenu();
+		// this.input.on('pointerdown', function (pointer) {}, this);
+	}
+	
+	update(delta) {
+		
+		/* Dynamically change world bounds based on player pos */
+		// scene.physics.world.setBounds(x, y, width, height, checkLeft, checkRight, checkUp, checkDown);
+        this.physics.world.setBounds(0, -player.yChange, this.physics.world.bounds.width, this.game.config.height + player.yChange);
+		
+        /* Camera tracking */
+        // this.cameras.main.startFollow(player, true);
+        this.cameras.main.setLerp(.5);
+		this.cameras.main.centerOnY(player.y);
+		
+		/* Arrow buttons and M_Clicks */
+		var pointer = this.input.activePointer;
+		if (this.key_right.isDown || pointer.rightButtonDown()) player.body.velocity.x = 400;
+		else if (this.key_left.isDown || pointer.isDown) player.body.velocity.x = -400;
+		else player.body.velocity.x = 0;
+		/* Touch events !? */
+		this.input.on('gameobjectdown', function (pointer) {
+
+			if (pointer.x < game.config.width/2) {
+				player.body.velocity.x = -400;
+			} else  if (pointer.x > game.config.width/2){
+				player.body.velocity.x = 400;
+			}
+			else 
+				player.body.velocity.x = 0;
+		});
+
+		/* Up arrow to give Y velocity for debug beyond camera screen */
+		if (this.key_Up.isDown) player.body.velocity.y = -400;
+
+		/* Wrap the player from left <==> right of the screen. */
+		this.physics.world.wrap(player, player.width / 6, false);
+
+        /* track the maximum amount that the hero has travelled */
+		player.yChange = Math.max( player.yChange, Math.abs( player.y - player.yOrig ) );
+		
+		/* For each tilesGroup child, find out which is the highest
+		if one goes below the camera view, then create a new one at a distance from the highest one
+		these are pooled so they are very performant */
+		tilesGroup.children.iterate(function( item ) {
+			var chance = Phaser.Math.Between(1, 100);
+			var chance2 = Phaser.Math.Between(1, 100);
+			var xAxis;
+			var yAxis = this.tileYMin - 200;
+			this.tileYMin = Math.min( this.tileYMin, item.y );
+			this.cameraYMin = Math.min( this.cameraYMin, player.y - this.game.config.height + 430 );
+			
+			if( item.y > this.cameraYMin + this.game.config.height ){
+				item.destroy();
+				/* 15% chance for Disappearing Tile */
+				if (chance > 70 && chance < 86)
+				{
+					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
+					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
+					td = this.spawnTileDis( Phaser.Math.Between( 100, xAxis - 100 ) || Phaser.Math.Between( xAxis+100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis + 100 , yAxis - 100), 'tile-d');
+				}
+				/* 15% chance for Breaking Tile */
+				else if ( chance > 85)
+				{
+					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
+					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
+					tb = this.spawnTileBreak( Phaser.Math.Between( xAxis + 100, this.physics.world.bounds.width - 100 ) || Phaser.Math.Between( 100, xAxis - 100 ), Phaser.Math.Between(yAxis + 100 , yAxis - 100), 'tile-b');
+				}
+				/* Else Regular Tiles */
+				else if (chance < 71)
+					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
+					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
+					
+				/* 20% chance2 of spawning spring */
+				if (chance2 > 60 && chance2 < 81) {
+					this.spawnSpring(xAxis, yAxis - 5, 'spring')
+				}
+				/* 20% chance2 of spawning stars */
+				else if (chance2 > 80) {
+					this.spawnStar(Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis, yAxis - 100), 'star')
+					
+				} 
+				else if (chance2 < 61){
+					
+				}
+			}
+		}, this );
+		
 	}
 
 	/* Create Player Model */
@@ -226,79 +320,6 @@ class Game extends Phaser.Scene {
 					e.destroy();
 				
 			},this);
-	}
-
-	update(delta) {
-
-        /* Dynamically change world bounds based on player pos */
-		// scene.physics.world.setBounds(x, y, width, height, checkLeft, checkRight, checkUp, checkDown);
-        this.physics.world.setBounds(0, -player.yChange, this.physics.world.bounds.width, this.game.config.height + player.yChange);
-		
-        /* Camera tracking */
-        // this.cameras.main.startFollow(player, true);
-        this.cameras.main.setLerp(.5);
-		this.cameras.main.centerOnY(player.y);
-		
-		if (this.key_left.isDown) player.body.velocity.x = -400;
-		else if (this.key_right.isDown) player.body.velocity.x = 400;
-		else player.body.velocity.x = 0;
-		
-		/* Up arrow to give Y velocity for debug beyond camera screen */
-		if (this.key_Up.isDown) player.body.velocity.y = -400;
-
-		/* Wrap the player from left <==> right of the screen. */
-		this.physics.world.wrap(player, player.width / 6, false);
-
-        /* track the maximum amount that the hero has travelled */
-		player.yChange = Math.max( player.yChange, Math.abs( player.y - player.yOrig ) );
-		
-		/* For each tilesGroup child, find out which is the highest
-		if one goes below the camera view, then create a new one at a distance from the highest one
-		these are pooled so they are very performant */
-		tilesGroup.children.iterate(function( item ) {
-			var chance = Phaser.Math.Between(1, 100);
-			var chance2 = Phaser.Math.Between(1, 100);
-			var xAxis;
-			var yAxis = this.tileYMin - 200;
-			this.tileYMin = Math.min( this.tileYMin, item.y );
-			this.cameraYMin = Math.min( this.cameraYMin, player.y - this.game.config.height + 430 );
-			
-			if( item.y > this.cameraYMin + this.game.config.height ){
-				item.destroy();
-				/* 15% chance for Disappearing Tile */
-				if (chance > 70 && chance < 86)
-				{
-					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
-					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
-					td = this.spawnTileDis( Phaser.Math.Between( 100, xAxis - 100 ) || Phaser.Math.Between( xAxis+100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis + 100 , yAxis - 100), 'tile-d');
-				}
-				/* 15% chance for Breaking Tile */
-				else if ( chance > 85)
-				{
-					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
-					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
-					tb = this.spawnTileBreak( Phaser.Math.Between( xAxis + 100, this.physics.world.bounds.width - 100 ) || Phaser.Math.Between( 100, xAxis - 100 ), Phaser.Math.Between(yAxis + 100 , yAxis - 100), 'tile-b');
-				}
-				/* Else Regular Tiles */
-				else if (chance < 71)
-					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
-					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
-					
-				/* 20% chance2 of spawning spring */
-				if (chance2 > 60 && chance2 < 81) {
-					this.spawnSpring(xAxis, yAxis - 5, 'spring')
-				}
-				/* 20% chance2 of spawning stars */
-				else if (chance2 > 80) {
-					this.spawnStar(Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis, yAxis - 100), 'star')
-					
-				} 
-				else if (chance2 < 61){
-					
-				}
-			}
-		}, this );
-		
 	}
 	
 }
