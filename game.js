@@ -87,7 +87,6 @@ class Game extends Phaser.Scene {
 		this.key_Up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
 		/* Mouse Clicks */
 		this.input.mouse.disableContextMenu();
-		// this.input.on('pointerdown', function (pointer) {}, this);
 	}
 	
 	update(delta) {
@@ -101,21 +100,33 @@ class Game extends Phaser.Scene {
         this.cameras.main.setLerp(.5);
 		this.cameras.main.centerOnY(player.y);
 		
-		/* Arrow buttons and M_Clicks */
-		var pointer = this.input.activePointer;
-		if (this.key_right.isDown || pointer.rightButtonDown()) player.body.velocity.x = 400;
-		else if (this.key_left.isDown || pointer.isDown) player.body.velocity.x = -400;
+		/* Arrow buttons */
+		if (this.key_right.isDown) player.body.velocity.x = 400;
+		else if (this.key_left.isDown) player.body.velocity.x = -400;
 		else player.body.velocity.x = 0;
-		/* Touch events !? */
-		this.input.on('gameobjectdown', function (pointer) {
 
-			if (pointer.x < game.config.width/2) {
-				player.body.velocity.x = -400;
-			} else  if (pointer.x > game.config.width/2){
+		/* Mouse wheel events */
+		this.input.on('wheel', function(pointer, deltaY){
+			console.log(this.deltaY);
+			if (deltaY > 0) {
 				player.body.velocity.x = 400;
+			} else if (deltaY < 0) {
+				player.body.velocity.x = -400;
 			}
-			else 
-				player.body.velocity.x = 0;
+			else player.body.x = 0;
+		});
+		
+		/* Touch events !? */
+		this.input.on('pointerdown', function (pointer) {
+			if (pointer.x > 300) {
+				player.body.velocity.x = 400;
+			} else  if (pointer.x < 301){
+				player.body.velocity.x = -400;
+			}
+			else player.body.velocity.x = 0;
+		});
+		this.input.on('pointerup', function(pointer){
+			player.body.velocity.x = 0;
 		});
 
 		/* Up arrow to give Y velocity for debug beyond camera screen */
