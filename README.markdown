@@ -20,7 +20,7 @@ Monster Shoots | ![enemy - s](assets/enemy-s-01.svg)
 
 _Various control methods baked in!_
 * _KBD_ :keyboard: Arrow keys: LEFT and RIGHT
-* _Touch Screen_: Touch zones across the middle of the screen width.
+* _Touch Screen_: Touch zones across the middle of the screen height.
 * Gyroscope / Device Orientation
 
 ---
