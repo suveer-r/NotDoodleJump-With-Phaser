@@ -9,6 +9,10 @@ var breakTilesGroup;
 var breakTileChild;
 var DisTilesGroup
 var DisTileChild;
+var springGroup;
+var springChild;
+var starGroup;
+var starChild;
 var score = 0;
 var scoreText;
 var tn;
@@ -32,8 +36,8 @@ class Game extends Phaser.Scene {
 		this.load.svg("tile-d", "assets/tile-d-01.svg", { scale: 1 });
 		this.load.svg("tile-b", "assets/tile-b-01.svg", { scale: 1 });
 		this.load.svg("rocket", "assets/");
-		this.load.svg("spring", "assets/spring.svg", {scale: 1});
-		this.load.svg("star", "assets/star-01.svg", {scale: 1} );
+		this.load.svg("spring", "assets/spring.svg", {scale: 1.8});
+		this.load.svg("star", "assets/star-01.svg", {scale: 2.1});
 		this.load.svg("enemy-m", "assets/enemy-m-01.svg", {scale: 1});
 		this.load.svg("enemy-s", "assets/enemy-s-01.svg", {scale: 1});
 	}
@@ -53,6 +57,10 @@ class Game extends Phaser.Scene {
 		this.createDisTiles();
 		/* Create Player Model */
 		this.createPlayer();
+		/* Create Springs */
+		this.createSpring();
+		/* Create Stars */
+		this.createStars();
 		/* Score Text */
 		scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#a0f' }).setScrollFactor(0);
 
@@ -61,6 +69,8 @@ class Game extends Phaser.Scene {
 		this.physics.add.collider(player, tilesGroup, this.bounceBack, null, this);
 		this.physics.add.collider(player, DisTilesGroup, this.TileDisappear, null, this);
 		this.physics.add.overlap(player, breakTilesGroup, this.TileBreak, null, this);
+		this.physics.add.collider(player, springGroup, this.BigBounce, null, this);
+		this.physics.add.overlap(player, starGroup, this.pickStars, null, this);
 
 		/* camera and tile tracking vars */
 		this.cameraYMin = 99999;
@@ -83,7 +93,6 @@ class Game extends Phaser.Scene {
 		player.body.checkCollision.down = true;
 		player.body.checkCollision.left = false;
 		player.body.checkCollision.right = false;
-		// player.scale = 0.5;
 		player.depth = 1;
 
 		player.yOrig = player.y;
@@ -101,17 +110,33 @@ class Game extends Phaser.Scene {
 			tn = this.spawnTile( Phaser.Math.Between( 25, this.physics.world.bounds.width - 25 ), this.physics.world.bounds.height - 200 - 200 * i, 'tile-n');
 		}
 	} 
-
+	
+	/* Create Breaking Tiles */
 	createBreakTiles(){
 		breakTilesGroup = this.physics.add.staticGroup({runChildUpdate: false});
 		breakTilesGroup.enableBody = true;
 		breakTileChild = breakTilesGroup.getChildren();
 	}
 	
+	/* Create Disappearing Tiles */
 	createDisTiles(){
 		DisTilesGroup = this.physics.add.staticGroup({runChildUpdate: false});
 		DisTilesGroup.enableBody = true;
 		DisTileChild = DisTilesGroup.getChildren();
+	}
+
+	/* Create Springs */
+	createSpring(){
+		springGroup = this.physics.add.staticGroup({runChildUpdate: false});
+		springGroup.enableBody = true;
+		springChild = springGroup.getChildren();
+	}
+
+	/* Create Stars */
+	createStars(){
+		starGroup = this.physics.add.staticGroup({runChildUpdate: false});
+		starGroup.enableBody = true;
+		starChild = starGroup.getChildren();
 	}
 	
 	/* Sub function for Regular tiles.*/  
@@ -127,6 +152,7 @@ class Game extends Phaser.Scene {
 		tile.setImmovable();
 		return tile;
 	}
+	
 	/* Sub function for Disappearing tiles.*/  
     spawnTileDis(x, y, type){
 		tile = DisTilesGroup.create(x, y, type);
@@ -134,7 +160,21 @@ class Game extends Phaser.Scene {
 		return tile;
 	}
 
-	/* Bounce off Regular Tiles */
+	/* Sub function for Springs.*/  
+    spawnSpring(x, y, type){
+		spring = springGroup.create(x, y, type);
+		spring.setImmovable();
+		return spring;
+	}
+
+	/* Sub function for Stars.*/  
+    spawnStar(x, y, type){
+		star = starGroup.create(x, y, type);
+		star.setImmovable();
+		return star;
+	}
+
+	/* Bounce off Regular Tiles / Regular Tile interaction */
 	bounceBack(_player, _tilesGroup){
 		if (_player.body.touching.down && _tilesGroup.body.touching.up)
             {
@@ -142,27 +182,48 @@ class Game extends Phaser.Scene {
 				scoreText.setText('Score: ' + score);              
 				player.body.velocity.y = -400;
             }
-		}
+	}
 		
-		TileDisappear(_player, _DisTilesGroup){
-			DisTilesGroup.children.each(function (e) {			
-				if (_player.body.touching.down && e.body.touching.up)
-				{
-					e.setAlpha(0);              
-					score = score + 10;
-					player.body.velocity.y = -400;
-					scoreText.setText('Score: ' + score);
+	/* Disappearing Tiles func / Dis Tile Interaction*/
+	TileDisappear(_player, _DisTilesGroup){
+		DisTilesGroup.children.each(function (e) {			
+			if (_player.body.touching.down && e.body.touching.up)
+			{
+				e.setAlpha(0);              
+				score = score + 10;
+				player.body.velocity.y = -400;
+				scoreText.setText('Score: ' + score);
 				
 			}            		
 		},this);
 	}
 
+	/* Breaking Tiles func / Breaking Tile Interaction */
 	TileBreak(_player, _breakTilesGroup){
 		breakTilesGroup.children.each(function(e){
 			if (_player.body.touching.down && e.body.touching.up)
 				{
 					e.destroy();
 				}            
+				
+			},this);
+	}
+
+	/* Spring Interaction func */
+	BigBounce(_player, _springGroup){
+			if (_player.body.touching.down && _springGroup.body.touching.up)
+				{
+					score += 100;
+					scoreText.setText('Score: ' + score);              
+					player.body.velocity.y = -1100;
+				}     
+	}
+	/* Stars Interaction func */
+	pickStars(_player, _starGroup){
+		starGroup.children.each(function(e){
+					score += 20;
+					scoreText.setText('Score:' + score);
+					e.destroy();
 				
 			},this);
 	}
@@ -196,33 +257,48 @@ class Game extends Phaser.Scene {
 		these are pooled so they are very performant */
 		tilesGroup.children.iterate(function( item ) {
 			var chance = Phaser.Math.Between(1, 100);
-			this.tileYMin = Math.min( this.tileYMin, item.y )
+			var chance2 = Phaser.Math.Between(1, 100);
+			var xAxis;
+			var yAxis = this.tileYMin - 200;
+			this.tileYMin = Math.min( this.tileYMin, item.y );
 			this.cameraYMin = Math.min( this.cameraYMin, player.y - this.game.config.height + 430 );
+			
 			if( item.y > this.cameraYMin + this.game.config.height ){
 				item.destroy();
 				/* 15% chance for Disappearing Tile */
 				if (chance > 70 && chance < 86)
 				{
-					console.log(chance);
-					var xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
-					tn = this.spawnTile( xAxis, this.tileYMin - 200, 'tile-n');
-					td = this.spawnTileDis( Phaser.Math.Between( 100, xAxis - 100 ) || Phaser.Math.Between( xAxis+100, this.physics.world.bounds.width - 100 ), this.tileYMin - 200, 'tile-d');
+					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
+					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
+					td = this.spawnTileDis( Phaser.Math.Between( 100, xAxis - 100 ) || Phaser.Math.Between( xAxis+100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis + 100 , yAxis - 100), 'tile-d');
 				}
 				/* 15% chance for Breaking Tile */
 				else if ( chance > 85)
 				{
-					console.log(chance);
-						var xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
-						tn = this.spawnTile( xAxis, this.tileYMin - 200, 'tile-n');
-						tb = this.spawnTileBreak( Phaser.Math.Between( xAxis + 100, this.physics.world.bounds.width - 100 ) || Phaser.Math.Between( 100, xAxis - 100 ), this.tileYMin - 200, 'tile-b');
-					}
+					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
+					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
+					tb = this.spawnTileBreak( Phaser.Math.Between( xAxis + 100, this.physics.world.bounds.width - 100 ) || Phaser.Math.Between( 100, xAxis - 100 ), Phaser.Math.Between(yAxis + 100 , yAxis - 100), 'tile-b');
+				}
+				/* Else Regular Tiles */
+				else if (chance < 71)
+					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
+					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
 					
-					else if (chance < 75)
-					tn = this.spawnTile( Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 ), this.tileYMin - 200, 'tile-n');
+				/* 20% chance2 of spawning spring */
+				if (chance2 > 60 && chance2 < 81) {
+					this.spawnSpring(xAxis, yAxis - 5, 'spring')
+				}
+				/* 20% chance2 of spawning stars */
+				else if (chance2 > 80) {
+					this.spawnStar(Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis, yAxis - 100), 'star')
+					
+				} 
+				else if (chance2 < 61){
 					
 				}
+			}
 		}, this );
-	
+		
 	}
 	
 }
