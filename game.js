@@ -104,32 +104,22 @@ class Game extends Phaser.Scene {
 		if (this.key_right.isDown) player.body.velocity.x = 400;
 		else if (this.key_left.isDown) player.body.velocity.x = -400;
 		else player.body.velocity.x = 0;
-
-var pointer = this.input.activePointer;
-		/* Mouse wheel events */
-		this.input.on('wheel', function(pointer, deltaY){
-			console.log(this.deltaY);
-			if (deltaY > 0) {
-				player.body.velocity.x = 400;
-			} else if (deltaY < 0) {
-				player.body.velocity.x = -400;
-			}
-			else player.body.x = 0;
-		});
 		
 		/* Touch events !? */
-		this.input.on('pointerdown', function (pointer) {
+		var pointer = this.input.activePointer;
+		
+		if (pointer.isDown){
 			if (pointer.x > 300) {
 				player.body.velocity.x = 400;
 			} else  if (pointer.x < 301){
 				player.body.velocity.x = -400;
 			}
 			else player.body.velocity.x = 0;
-		});
-		this.input.on('pointerup', function(pointer){
-			player.body.velocity.x = 0;
-		});
-
+		};
+		
+		/* Device Orientation */
+		window.addEventListener("deviceorientation", this.handleOrientation, true);
+		
 		/* Up arrow to give Y velocity for debug beyond camera screen */
 		if (this.key_Up.isDown) player.body.velocity.y = -400;
 
@@ -333,5 +323,16 @@ var pointer = this.input.activePointer;
 				
 			},this);
 	}
-	
+	handleOrientation (e) {
+		var dx = e.gamma;
+		var dy = e.beta;
+		// Ball._player.body.velocity.x += x;
+		// Ball._player.body.velocity.y += y;
+		if (dx > 0) {
+			player.body.velocity.x = 400;
+		} else if (dx < 0 ){
+			player.body.velocity.x = -400
+		}
+		else player.body.velocity.x = 0;
+	}
 }
