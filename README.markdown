@@ -6,6 +6,7 @@ This is ~~an assignment, but more of~~ a reason for me to learn the Phaser API, 
 Two external links I have referred to, outside [Phaser API Docs](https://photonstorm.github.io/phaser3-docs/index.html) are [Rex Notes](https://rexrainbow.github.io/phaser3-rex-notes/docs/site/index.html) &  [PhaserGames](https://phasergames.com/)
 
 _Game assets listed._
+
 Title | SVG
 ------------ | -------------
 Player Model | ![Player Model](assets/player-01.svg)
