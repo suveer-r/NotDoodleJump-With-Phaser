@@ -87,7 +87,6 @@ class Game extends Phaser.Scene {
 		this.key_Up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
 		/* Mouse Clicks */
 		this.input.mouse.disableContextMenu();
-		var pointer = this.input.activePointer;
 	}
 	
 	update(delta) {
@@ -106,6 +105,7 @@ class Game extends Phaser.Scene {
 		else if (this.key_left.isDown) player.body.velocity.x = -400;
 		else player.body.velocity.x = 0;
 
+var pointer = this.input.activePointer;
 		/* Mouse wheel events */
 		this.input.on('wheel', function(pointer, deltaY){
 			console.log(this.deltaY);
