@@ -25,6 +25,7 @@ var spring;
 var star;
 var enemy_m;
 var enemy_s;
+
 class Game extends Phaser.Scene {
 	constructor() {
 		super("Game");
@@ -87,6 +88,9 @@ class Game extends Phaser.Scene {
 		this.key_Up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
 		/* Mouse Clicks */
 		this.input.mouse.disableContextMenu();
+		
+		/* Device Orientation */
+		window.addEventListener("deviceorientation", this.handleOrientation, true);
 	}
 	
 	update(delta) {
@@ -117,8 +121,6 @@ class Game extends Phaser.Scene {
 			else player.body.velocity.x = 0;
 		};
 		
-		/* Device Orientation */
-		window.addEventListener("deviceorientation", this.handleOrientation, true);
 		
 		/* Up arrow to give Y velocity for debug beyond camera screen */
 		if (this.key_Up.isDown) player.body.velocity.y = -400;
@@ -325,10 +327,11 @@ class Game extends Phaser.Scene {
 	}
 	handleOrientation (e) {
 		var dx = e.gamma;
+		console.log(this.player.body.velocity.x);
 		if (dx > 0) {
-			player.body.velocity.x = (400/45)*dx;
+			player.body.velocity.x = 400;
 		} else if (dx < 0 ){
-			player.body.velocity.x = -(400/45)*dx;
+			player.body.velocity.x = -400;
 		}
 		else player.body.velocity.x = 0;
 	}
