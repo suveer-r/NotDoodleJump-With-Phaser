@@ -327,8 +327,14 @@ class Game extends Phaser.Scene {
 	}
 	handleOrientation (e) {
 		var dx = e.gamma;
-		player.body.velocity.x = 0;
-		player.body.velocity.x += dx*dx/2;
+		var edx = dx*dx/2;
+		if (dx<0) {
+			player.body.velocity.x = -edx;
+		} else {
+			player.body.velocity.x = edx;
+			
+		}
+		// player.body.velocity.x = 0;
 		if (player.body.velocity.x > 400) {
 			player.body.velocity.x = 400;
 		}
