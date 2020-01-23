@@ -1,6 +1,6 @@
 # NoT DoodleJump :video_game:
 ##### Made with [Phaser 3.21.0](https://github.com/photonstorm/phaser)
-### [Play Here](https://github.com/photonstorm/phaser)
+### [Play Here](https://suveer-r.github.io/NotDoodleJump-With-Phaser/)
 
 This is ~~an assignment, but more of~~ a reason for me to learn the Phaser API, and enter this new world of game dev frameworks! So far. So good. So fun! <br>
 Two external links I have referred to, outside [Phaser API Docs](https://photonstorm.github.io/phaser3-docs/index.html) are [Rex Notes](https://rexrainbow.github.io/phaser3-rex-notes/docs/site/index.html) &  [PhaserGames](https://phasergames.com/)
