@@ -27,7 +27,7 @@ _Various control methods baked in!_
 ### License:
  The underlying source code of this game is licensed under the [MIT license](https://github.com/suveer-r/NotDoodleJump-With-Phaser/blob/master/LICENSE)
 
-`Cheers :wave:`<br>
+`Cheers` :wave:<br>
 `Suveer Raina`
 
  ###### What did I learn the most - checklist.
