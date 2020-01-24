@@ -15,7 +15,7 @@ Disappearing Tile | ![Disappearing Tile](assets/tile-d-01.svg)
 Destructive Tile | ![Destryuctive Tile](assets/tile-b-01.svg)
 Spring | ![Spring](assets/spring.svg)
 Star / Points | ![Stars](assets/star-01.svg)
-Monster Kills on Touch | ![enemy - m](assets/enemy-m-01.svg)
+Monster Kills on Touch | ![enemy - n](assets/enemy-n-01.svg)
 Monster Shoots | ![enemy - s](assets/enemy-s-01.svg)
 
 ##### _Various control methods baked in!_
