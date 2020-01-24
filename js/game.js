@@ -1,5 +1,3 @@
-// var tile;
-var scaleRatio = window.devicePixelRatio / 3;
 var player;
 var floor;
 var tile;
@@ -13,8 +11,13 @@ var springGroup;
 var springChild;
 var starGroup;
 var starChild;
+var enemyNgroup;
+var enemyNchild;
+var enemySgroup;
+var enemySchild;
 var score = 0;
 var scoreText;
+var GameOverText;
 var tn;
 var td;
 var tb;
@@ -23,7 +26,7 @@ var zoneR;
 var rocket;
 var spring;
 var star;
-var enemy_m;
+var enemy_n;
 var enemy_s;
 
 class Game extends Phaser.Scene {
@@ -41,8 +44,8 @@ class Game extends Phaser.Scene {
 		this.load.svg("rocket", "assets/");
 		this.load.svg("spring", "assets/spring.svg", {scale: 1.8});
 		this.load.svg("star", "assets/star-01.svg", {scale: 2.1});
-		this.load.svg("enemy-m", "assets/enemy-m-01.svg", {scale: 1});
-		this.load.svg("enemy-s", "assets/enemy-s-01.svg", {scale: 1});
+		this.load.svg("enemy-n", "assets/enemy-n-01.svg", {scale: 2.7});
+		this.load.svg("enemy-s", "assets/enemy-s-01.svg", {scale: 2.7});
 	}
 
 	create() {
@@ -64,19 +67,32 @@ class Game extends Phaser.Scene {
 		this.createSpring();
 		/* Create Stars */
 		this.createStars();
+		/* Create Normal Enemies */
+		this.createEnemyN();
+		/* Create Shooting Enemies */
+		this.createEnemyS();
+
 		/* Score Text */
-		scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#a0f' }).setScrollFactor(0);
+		scoreText = this.add.text(16, 16, 'Score: 0', { fontFamily: '"Montserrat"', fontSize: '32px', fill: '#a0f' }).setScrollFactor(0);
+		scoreText.depth = 2;
+		/* Game Over Text */
+		GameOverText = this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', { fontFamily: '"Montserrat"', fontSize: '90px', fill: '#33'}).setScrollFactor(0);
+		GameOverText.setOrigin(0.5);
+		GameOverText.depth = 2;
+		GameOverText.visible = false;
 		/* Touch Zones */
 		zoneL = this.add.zone(0, 0, game.config.width/2, game.config.height).setInteractive().setScrollFactor(0);
 		zoneR = this.add.zone(game.config.width/2, 0, game.config.width/2, game.config.height).setInteractive().setScrollFactor(0);
 
 		/* Collision checks and events */
-		this.physics.add.collider(player, floor);
+		this.physics.add.collider(player, floor, this.GameOver, null, this);
 		this.physics.add.collider(player, tilesGroup, this.bounceBack, null, this);
 		this.physics.add.collider(player, DisTilesGroup, this.TileDisappear, null, this);
 		this.physics.add.overlap(player, breakTilesGroup, this.TileBreak, null, this);
 		this.physics.add.collider(player, springGroup, this.BigBounce, null, this);
 		this.physics.add.overlap(player, starGroup, this.pickStars, null, this);
+		this.physics.add.overlap(player, enemyNgroup, this.GameOver, null, this);
+		this.physics.add.overlap(player, enemySgroup, this.GameOver, null, this);
 
 		/* camera and tile tracking vars */
 		this.cameraYMin = 99999;
@@ -93,6 +109,9 @@ class Game extends Phaser.Scene {
 	
 	update(delta) {
 		
+		/* track the maximum amount that the hero has travelled */
+		player.yChange = Math.max( player.yChange, Math.abs( player.y - player.yOrig ) );
+
 		/* Dynamically change world bounds based on player pos */
 		// scene.physics.world.setBounds(x, y, width, height, checkLeft, checkRight, checkUp, checkDown);
         this.physics.world.setBounds(0, -player.yChange, this.physics.world.bounds.width, this.game.config.height + player.yChange);
@@ -128,15 +147,18 @@ class Game extends Phaser.Scene {
 		/* Wrap the player from left <==> right of the screen. */
 		this.physics.world.wrap(player, player.width / 6, false);
 
-        /* track the maximum amount that the hero has travelled */
-		player.yChange = Math.max( player.yChange, Math.abs( player.y - player.yOrig ) );
-		
+		/* if the hero falls below the camera view, gameover */
+		if( player.y > this.cameraYMin + this.game.config.height ) {
+			this.GameOver();
+		}
+
 		/* For each tilesGroup child, find out which is the highest
 		if one goes below the camera view, then create a new one at a distance from the highest one
 		these are pooled so they are very performant */
 		tilesGroup.children.iterate(function( item ) {
 			var chance = Phaser.Math.Between(1, 100);
 			var chance2 = Phaser.Math.Between(1, 100);
+			var chance3 = Phaser.Math.Between(1, 100);
 			var xAxis;
 			var yAxis = this.tileYMin - 200;
 			this.tileYMin = Math.min( this.tileYMin, item.y );
@@ -145,14 +167,14 @@ class Game extends Phaser.Scene {
 			if( item.y > this.cameraYMin + this.game.config.height ){
 				item.destroy();
 				/* 15% chance for Disappearing Tile */
-				if (chance > 70 && chance < 86)
+				if (chance > 75 && chance < 81)
 				{
 					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
 					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
 					td = this.spawnTileDis( Phaser.Math.Between( 100, xAxis - 100 ) || Phaser.Math.Between( xAxis+100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis + 100 , yAxis - 100), 'tile-d');
 				}
 				/* 15% chance for Breaking Tile */
-				else if ( chance > 85)
+				else if ( chance > 80)
 				{
 					xAxis = Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 );
 					tn = this.spawnTile( xAxis, yAxis, 'tile-n');
@@ -165,7 +187,7 @@ class Game extends Phaser.Scene {
 					
 				/* 20% chance2 of spawning spring */
 				if (chance2 > 60 && chance2 < 81) {
-					this.spawnSpring(xAxis, yAxis - 5, 'spring')
+					this.spawnSpring(Phaser.Math.Between(xAxis - 50, xAxis + 50), yAxis - 5, 'spring')
 				}
 				/* 20% chance2 of spawning stars */
 				else if (chance2 > 80) {
@@ -174,6 +196,13 @@ class Game extends Phaser.Scene {
 				} 
 				else if (chance2 < 61){
 					
+				}
+
+				/* 10% chance of spawning enemies */
+				if (chance3 > 80 && chance3 < 91) {
+					this.spawnEnemyN(Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis, yAxis - 100), 'enemy-n')
+				} else if (chance3 > 90){
+					this.spawnEnemyS(Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis, yAxis - 100), 'enemy-s')
 				}
 			}
 		}, this );
@@ -184,7 +213,7 @@ class Game extends Phaser.Scene {
 	createPlayer() {
         player = this.physics.add.image(game.config.width/2, 3*game.config.height/4, "player");
 		// player.body.setCollideWorldBounds();
-		player.setVelocity(0, -400);
+		player.setVelocity(0, -500);
 		player.setGravityY(360);
 		player.setBounce(0.4);
 		player.body.checkCollision.up = false;
@@ -236,6 +265,20 @@ class Game extends Phaser.Scene {
 		starGroup.enableBody = true;
 		starChild = starGroup.getChildren();
 	}
+
+	/* Create Normal Enemies group */
+	createEnemyN(){
+		enemyNgroup = this.physics.add.staticGroup({runChildUpdate: false});
+		enemyNgroup.enableBody = true;
+		enemyNchild = enemyNgroup.getChildren();
+	}
+
+	/* Create Shooting Enemies group */
+	createEnemyS(){
+		enemySgroup = this.physics.add.staticGroup({runChildUpdate: false});
+		enemySgroup.enableBody = true;
+		enemySchild = enemySgroup.getChildren();
+	}
 	
 	/* Sub function for Regular tiles.*/  
     spawnTile(x, y, type){
@@ -270,6 +313,20 @@ class Game extends Phaser.Scene {
 		star = starGroup.create(x, y, type);
 		star.setImmovable();
 		return star;
+	}
+
+	/* Sub function for enemy N.*/  
+    spawnEnemyN(x, y, type){
+		enemy_n = enemyNgroup.create(x, y, type);
+		enemy_n.setImmovable();
+		return enemy_n;
+	}
+
+	/* Sub function for enemy S.*/  
+    spawnEnemyS(x, y, type){
+		enemy_s = enemySgroup.create(x, y, type);
+		enemy_s.setImmovable();
+		return enemy_s;
 	}
 
 	/* Bounce off Regular Tiles / Regular Tile interaction */
@@ -316,6 +373,7 @@ class Game extends Phaser.Scene {
 					player.body.velocity.y = -1100;
 				}     
 	}
+
 	/* Stars Interaction func */
 	pickStars(_player, _starGroup){
 		starGroup.children.each(function(e){
@@ -325,9 +383,38 @@ class Game extends Phaser.Scene {
 				
 			},this);
 	}
+
+	GameOver(){
+		// Show Game Over Text
+		GameOverText.visible = true;
+		scoreText.setPosition(this.game.config.width/2, this.game.config.height/2 + 100);
+		scoreText.setFontSize(45);
+		scoreText.setOrigin(0.5);
+
+		/* Hide and clear assets */
+		tilesGroup.setAlpha(0);
+		tilesGroup.clear();
+		breakTilesGroup.setAlpha(0);
+		breakTilesGroup.clear();
+		DisTilesGroup.setAlpha(0);
+		DisTilesGroup.clear();
+		springGroup.setAlpha(0);
+		springGroup.clear()
+		starGroup.setAlpha(0);
+		starGroup.clear();
+		enemyNgroup.setAlpha(0);
+		enemyNgroup.clear();
+		enemySgroup.setAlpha(0);
+		enemySgroup.clear();
+
+		/* Player Opacity */
+		player.setAlpha(.45);
+	}
+
 	handleOrientation (e) {
 		var dx = e.gamma;
-		var edx = dx*dx/2;
+		var edx = (dx/3.5)**4;
+		console.log(dx, edx);
 		if (dx<0) {
 			player.body.velocity.x = -edx;
 		} else {
@@ -340,6 +427,5 @@ class Game extends Phaser.Scene {
 		}
 		else if (player.body.velocity.x < -400)
 		player.body.velocity.x = -400;
-		console.log(this.player.body.velocity.x);
 	}
 }

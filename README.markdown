@@ -5,7 +5,7 @@
 This is ~~an assignment, but more of~~ a reason for me to learn the Phaser API, and enter this new world of game dev frameworks! So far. So good. So fun! <br>
 Two external links I have referred to, outside [Phaser API Docs](https://photonstorm.github.io/phaser3-docs/index.html) are [Rex Notes](https://rexrainbow.github.io/phaser3-rex-notes/docs/site/index.html) &  [PhaserGames](https://phasergames.com/)
 
-_Game assets listed._
+##### _Game assets listed._
 
 Title | SVG
 ------------ | -------------
@@ -18,7 +18,7 @@ Star / Points | ![Stars](assets/star-01.svg)
 Monster Kills on Touch | ![enemy - m](assets/enemy-m-01.svg)
 Monster Shoots | ![enemy - s](assets/enemy-s-01.svg)
 
-_Various control methods baked in!_
+##### _Various control methods baked in!_
 * _KBD_ :keyboard: Arrow keys: LEFT and RIGHT
 * _Touch Screen_: Touch zones across the middle of the screen height.
 * Gyroscope / Device Orientation
