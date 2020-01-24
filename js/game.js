@@ -235,7 +235,7 @@ class Game extends Phaser.Scene {
 
 				/* 10% chance of spawning enemies */
 				if (chance3 > 80 && chance3 < 91) {
-					this.spawnEnemyN(Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis, yAxis - 100), 'enemy-n')
+					this.spawnEnemyN(0, Phaser.Math.Between(yAxis, yAxis - 100), 'enemy-n')
 				} else if (chance3 > 90){
 					this.spawnEnemyS(Phaser.Math.Between( 100, this.physics.world.bounds.width - 100 ), Phaser.Math.Between(yAxis, yAxis - 100), 'enemy-s')
 				}
@@ -303,14 +303,14 @@ class Game extends Phaser.Scene {
 
 	/* Create Normal Enemies group */
 	createEnemyN(){
-		enemyNgroup = this.physics.add.staticGroup({runChildUpdate: false});
+		enemyNgroup = this.physics.add.group({runChildUpdate: false});
 		enemyNgroup.enableBody = true;
 		enemyNchild = enemyNgroup.getChildren();
 	}
 
 	/* Create Shooting Enemies group */
 	createEnemyS(){
-		enemySgroup = this.physics.add.staticGroup({runChildUpdate: false});
+		enemySgroup = this.physics.add.group({runChildUpdate: false});
 		enemySgroup.enableBody = true;
 		enemySchild = enemySgroup.getChildren();
 	}
@@ -353,6 +353,7 @@ class Game extends Phaser.Scene {
 	/* Sub function for enemy N.*/  
     spawnEnemyN(x, y, type){
 		enemy_n = enemyNgroup.create(x, y, type);
+		enemy_n.body.velocity.x = 100;
 		enemy_n.setImmovable();
 		return enemy_n;
 	}
@@ -363,10 +364,6 @@ class Game extends Phaser.Scene {
 		particles.emitParticleAt(enemy_s.x, enemy_s.y);
 		enemy_s.setImmovable();
 	}
-
-	// createEmitter(){
-		
-	// }
 
 	/* Bounce off Regular Tiles / Regular Tile interaction */
 	bounceBack(_player, _tilesGroup){
@@ -383,7 +380,7 @@ class Game extends Phaser.Scene {
 		DisTilesGroup.children.each(function (e) {			
 			if (_player.body.touching.down && e.body.touching.up)
 			{
-				e.setAlpha(0);              
+				DisTilesGroup.remove(e, true);        
 				score = score + 10;
 				player.body.velocity.y = -400;
 				scoreText.setText('Score: ' + score);
@@ -397,7 +394,7 @@ class Game extends Phaser.Scene {
 		breakTilesGroup.children.each(function(e){
 			if (_player.body.touching.down && e.body.touching.up)
 				{
-					e.destroy();
+					breakTilesGroup.remove(e, true);
 				}            
 				
 			},this);
