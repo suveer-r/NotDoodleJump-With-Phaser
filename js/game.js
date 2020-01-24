@@ -1,4 +1,6 @@
+
 var player;
+var hit;
 var floor;
 var tile;
 var tilesGroup;
@@ -15,9 +17,11 @@ var enemyNgroup;
 var enemyNchild;
 var enemySgroup;
 var enemySchild;
+var particles;
 var score = 0;
 var scoreText;
 var GameOverText;
+var retryText;
 var tn;
 var td;
 var tb;
@@ -46,6 +50,7 @@ class Game extends Phaser.Scene {
 		this.load.svg("star", "assets/star-01.svg", {scale: 2.1});
 		this.load.svg("enemy-n", "assets/enemy-n-01.svg", {scale: 2.7});
 		this.load.svg("enemy-s", "assets/enemy-s-01.svg", {scale: 2.7});
+		this.load.image("bullet", "assets/laser.png")
 	}
 
 	create() {
@@ -71,15 +76,45 @@ class Game extends Phaser.Scene {
 		this.createEnemyN();
 		/* Create Shooting Enemies */
 		this.createEnemyS();
+		
+		var source = {
+			contains: function (x, y)
+			{
+				var hit = player.body.hitTest(x, y);
+				if (hit) {
+					this.GameOver();
+				}
+				return hit;
+			}
+		};
+		particles = this.add.particles('bullet');
+		this.emitter = particles.createEmitter({
+			// angle: { min: 0, max: 180 },
+			lifespan: Infinity,
+			speed: 50,
+			quantity: 5,
+			on: false,
+			deathZone: { type: 'onEnter', source: source, }
+		});
+		// this.emitter.onParticleDeath( this.GameOver);
+		particles.enableBody = true;
+		
 
 		/* Score Text */
 		scoreText = this.add.text(16, 16, 'Score: 0', { fontFamily: '"Montserrat"', fontSize: '32px', fill: '#a0f' }).setScrollFactor(0);
 		scoreText.depth = 2;
 		/* Game Over Text */
-		GameOverText = this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', { fontFamily: '"Montserrat"', fontSize: '90px', fill: '#33'}).setScrollFactor(0);
+		GameOverText = this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', { fontFamily: '"Montserrat"', fontSize: '90px', fill: '#333'}).setScrollFactor(0);
 		GameOverText.setOrigin(0.5);
 		GameOverText.depth = 2;
 		GameOverText.visible = false;
+	
+		/* Retry Text */
+		retryText = this.add.text(game.config.width/2, game.config.height/2 + 180, 'RETRY', { fontFamily: '"Montserrat"', fontSize: '32px', fill: '#00bfa9'}).setScrollFactor(0);
+		retryText.setOrigin(0.5);
+		retryText.depth = 2;
+		retryText.visible = false;
+	
 		/* Touch Zones */
 		zoneL = this.add.zone(0, 0, game.config.width/2, game.config.height).setInteractive().setScrollFactor(0);
 		zoneR = this.add.zone(game.config.width/2, 0, game.config.width/2, game.config.height).setInteractive().setScrollFactor(0);
@@ -93,6 +128,7 @@ class Game extends Phaser.Scene {
 		this.physics.add.overlap(player, starGroup, this.pickStars, null, this);
 		this.physics.add.overlap(player, enemyNgroup, this.GameOver, null, this);
 		this.physics.add.overlap(player, enemySgroup, this.GameOver, null, this);
+		this.physics.add.overlap(player, this.particles, this.GameOver, null, this);
 
 		/* camera and tile tracking vars */
 		this.cameraYMin = 99999;
@@ -104,7 +140,6 @@ class Game extends Phaser.Scene {
 		this.key_Up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
 		/* Mouse Clicks */
 		this.input.mouse.disableContextMenu();
-		
 	}
 	
 	update(delta) {
@@ -325,9 +360,13 @@ class Game extends Phaser.Scene {
 	/* Sub function for enemy S.*/  
     spawnEnemyS(x, y, type){
 		enemy_s = enemySgroup.create(x, y, type);
+		particles.emitParticleAt(enemy_s.x, enemy_s.y);
 		enemy_s.setImmovable();
-		return enemy_s;
 	}
+
+	// createEmitter(){
+		
+	// }
 
 	/* Bounce off Regular Tiles / Regular Tile interaction */
 	bounceBack(_player, _tilesGroup){
@@ -387,6 +426,13 @@ class Game extends Phaser.Scene {
 	GameOver(){
 		// Show Game Over Text
 		GameOverText.visible = true;
+
+		// retryText.visible = true;
+		// retryText.setInteractive(this.restart());
+	  
+
+		zoneL.removeInteractive();
+		zoneR.removeInteractive();
 		scoreText.setPosition(this.game.config.width/2, this.game.config.height/2 + 100);
 		scoreText.setFontSize(45);
 		scoreText.setOrigin(0.5);
@@ -409,6 +455,10 @@ class Game extends Phaser.Scene {
 
 		/* Player Opacity */
 		player.setAlpha(.45);
+	}
+
+	restart(){
+		// this.scene.start("Game");
 	}
 
 	handleOrientation (e) {
