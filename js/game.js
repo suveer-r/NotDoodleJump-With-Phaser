@@ -81,9 +81,9 @@ class Game extends Phaser.Scene {
 			contains: function (x, y)
 			{
 				var hit = player.body.hitTest(x, y);
-				if (hit) {
+				/* if (hit) {
 					this.GameOver();
-				}
+				} */
 				return hit;
 			}
 		};
