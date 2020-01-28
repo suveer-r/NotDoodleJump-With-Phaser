@@ -54,7 +54,7 @@ class Game extends Phaser.Scene {
 	}
 
 	create() {
-		
+
 		/* Create Floor */
 		floor = this.physics.add.image(game.config.width/2, 830,'tile-d');
 		floor.setImmovable();
@@ -114,11 +114,19 @@ class Game extends Phaser.Scene {
 		retryText.setOrigin(0.5);
 		retryText.depth = 2;
 		retryText.visible = false;
-	
-		/* Touch Zones */
-		zoneL = this.add.zone(0, 0, game.config.width/2, game.config.height).setInteractive().setScrollFactor(0);
-		zoneR = this.add.zone(game.config.width/2, 0, game.config.width/2, game.config.height).setInteractive().setScrollFactor(0);
+		/* retryText.setInteractive(
+			{useHandCursor: true});
+		retryText.on('pointerdown', function(){
+			var red = Phaser.Math.Between(50, 255);
+			var green = Phaser.Math.Between(50, 255);
+			var blue = Phaser.Math.Between(50, 255);
+			this.cameras.main.fade(1000, red, green, blue);
+		}, this);
+		this.cameras.main.on('camerafadeoutcomplete', function () {
+			this.scene.restart();
 
+		}, this); */
+	
 		/* Collision checks and events */
 		this.physics.add.collider(player, floor, this.GameOver, null, this);
 		this.physics.add.collider(player, tilesGroup, this.bounceBack, null, this);
@@ -260,7 +268,7 @@ class Game extends Phaser.Scene {
 	
 	/* Create Regular Tiles/Platform */
     createTiles(){
-        tilesGroup = this.physics.add.staticGroup({runChildUpdate: false});
+        tilesGroup = this.physics.add.staticGroup({runChildUpdate: true});
 		tilesGroup.enableBody = true;
 		tileChild = tilesGroup.getChildren();
 		
@@ -272,42 +280,42 @@ class Game extends Phaser.Scene {
 	
 	/* Create Breaking Tiles */
 	createBreakTiles(){
-		breakTilesGroup = this.physics.add.staticGroup({runChildUpdate: false});
+		breakTilesGroup = this.physics.add.staticGroup({runChildUpdate: true});
 		breakTilesGroup.enableBody = true;
 		breakTileChild = breakTilesGroup.getChildren();
 	}
 	
 	/* Create Disappearing Tiles */
 	createDisTiles(){
-		DisTilesGroup = this.physics.add.staticGroup({runChildUpdate: false});
+		DisTilesGroup = this.physics.add.staticGroup({runChildUpdate: true});
 		DisTilesGroup.enableBody = true;
 		DisTileChild = DisTilesGroup.getChildren();
 	}
 
 	/* Create Springs */
 	createSpring(){
-		springGroup = this.physics.add.staticGroup({runChildUpdate: false});
+		springGroup = this.physics.add.staticGroup({runChildUpdate: true});
 		springGroup.enableBody = true;
 		springChild = springGroup.getChildren();
 	}
 
 	/* Create Stars */
 	createStars(){
-		starGroup = this.physics.add.staticGroup({runChildUpdate: false});
+		starGroup = this.physics.add.staticGroup({runChildUpdate: true});
 		starGroup.enableBody = true;
 		starChild = starGroup.getChildren();
 	}
 
 	/* Create Normal Enemies group */
 	createEnemyN(){
-		enemyNgroup = this.physics.add.group({runChildUpdate: false});
+		enemyNgroup = this.physics.add.group({runChildUpdate: true});
 		enemyNgroup.enableBody = true;
 		enemyNchild = enemyNgroup.getChildren();
 	}
 
 	/* Create Shooting Enemies group */
 	createEnemyS(){
-		enemySgroup = this.physics.add.group({runChildUpdate: false});
+		enemySgroup = this.physics.add.group({runChildUpdate: true});
 		enemySgroup.enableBody = true;
 		enemySchild = enemySgroup.getChildren();
 	}
@@ -422,11 +430,7 @@ class Game extends Phaser.Scene {
 		GameOverText.visible = true;
 
 		// retryText.visible = true;
-		// retryText.setInteractive(this.restart());
 	  
-
-		zoneL.removeInteractive();
-		zoneR.removeInteractive();
 		scoreText.setPosition(this.game.config.width/2, this.game.config.height/2 + 100);
 		scoreText.setFontSize(45);
 		scoreText.setOrigin(0.5);
@@ -449,10 +453,6 @@ class Game extends Phaser.Scene {
 
 		/* Player Opacity */
 		player.setAlpha(.45);
-	}
-
-	restart(){
-		// this.scene.start("Game");
 	}
 
 	handleOrientation (e) {
