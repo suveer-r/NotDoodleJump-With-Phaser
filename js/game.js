@@ -177,7 +177,7 @@ class Game extends Phaser.Scene {
 		window.addEventListener("deviceorientation", this.handleOrientation, true);
 		
 		/* Up arrow to give Y velocity for debug beyond camera screen */
-		if (this.key_Up.isDown) player.body.velocity.y = -400;
+		// if (this.key_Up.isDown) player.body.velocity.y = -400;
 
 		/* Wrap the player from left <==> right of the screen. */
 		this.physics.world.wrap(player, player.width / 6, false);
@@ -252,9 +252,6 @@ class Game extends Phaser.Scene {
 		player.setGravityY(360);
 		player.setBounce(0.4);
 		player.body.checkCollision.up = false;
-		player.body.checkCollision.down = true;
-		player.body.checkCollision.left = false;
-		player.body.checkCollision.right = false;
 		player.depth = 1;
 
 		player.yOrig = player.y;
