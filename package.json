@@ -5,7 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "normalize.css": "^8.0.1",
-    "phaser": "^3.21.0",
+    "phaser": "^3.55.2",
     "phaser3-rex-plugins": "^1.1.7"
   },
   "devDependencies": {},
