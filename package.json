@@ -6,7 +6,7 @@
   "dependencies": {
     "normalize.css": "^8.0.1",
     "phaser": "^3.21.0",
-    "phaser3-rex-plugins": "^1.1.7"
+    "phaser3-rex-plugins": "^1.1.79"
   },
   "devDependencies": {},
   "scripts": {
